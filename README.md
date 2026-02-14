@@ -10,15 +10,18 @@ composer require eddieodira/messager
 ## Initial Setup
 To start using the Bulk SMS library in your CodeIgniter 4 project, there are a few setup steps you need to complete so the package integrates smoothly with your app:
 1. Run the following command. This command handles steps 1(a), 1(b) and 1(c) of the steps below.
-  ```php
-    php spark bulksms:publish
-  ```
-  (a) Config Setup: Copy the Bulksms.php from vendor/odiraeddie/src/Config/ into your project's config folder and update the namespace to Config. You will also need to have these classes extend the original classes. These files contain all the settings that you will need to be modified to meet the needs of your site.
-  (b) Helper Setup: The setting helpers need to be included in almost every page. The simplest way to do this is to add it to the app/Config/Autoload.php.
-  (c) Migration: Run the migrations.
+    ```php
+      php spark bulksms:publish
+    ```
+    Config Setup: Copy the Bulksms.php from vendor/odiraeddie/src/Config/ into your project's config folder and update the namespace to Config. You will also need to have       these classes extend the original classes. These files contain all the settings that you will need to be modified to meet the needs of your site.
+  
+    Helper Setup: The setting helpers need to be included in almost every page. The simplest way to do this is to add it to the app/Config/Autoload.php.
+  
+    Migration: Run the migrations.
     ```php
       php spark migrate --all
     ```
+    
 2. Update Validation Rules
    Add your custom rules to: 
     ```php
@@ -193,6 +196,29 @@ $bulksms = new Bulksms();
 $bulksms->send(['25472xxxxxxx, 25475xxxxxxx, 25476xxxxxxx'], 'Hello, I am just testing this applications');
 ```
 ## Schedule Bulk Messages
+
+In order to send schedule messages, add a third argument on the method send() ```$bulksms->send('2547xxxxxxxx', 'Hello, I am just testing this applications', '2026-04-25 09:46:00'); ```, with date and time as the argument:
+
+```php
+use Eddieodira\Messager\Bulksms;
+
+$bulksms = new Bulksms();
+$bulksms->send(['25472xxxxxxx, 25475xxxxxxx, 25476xxxxxxx'], 'Hello, I am just testing this applications', '2026-04-25 09:46:00');
+```
+
+## Template SMS with Dynamic Placeholders
+
+```php
+  use Eddieodira\Messager\Bulksms;
+
+  $bulksms = new Bulksms();
+  $sms = $bulksms->render('fees_increase', [
+      'name'          => 'John Doe',
+      'contact'       => 'Jane Doe',
+      'organisation'  => '....' //Name of Organisation goes here
+  ]);
+  $bulksms->send(['254715070754', '254707362220'], $sms);
+```
 
 In order to send schedule messages, add a third argument on the method send() ```$bulksms->send('2547xxxxxxxx', 'Hello, I am just testing this applications', '2026-04-25 09:46:00'); ```, with date and time as the argument:
 
