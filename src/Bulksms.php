@@ -81,9 +81,14 @@ class Bulksms extends Constants
         return $this->service->findTemplates();
     }
 
-    public function findTemplate(int|string $id): array
+    public function findTemplate(int|string $id): ?SMSTemplate
     {
         return $this->service->findTemplate($id);
+    }
+
+    public function findByWhere(string $column, string|int $where): ?SMSTemplate
+    {
+        return $this->service->findByWhere($column, $where);
     }
 
     public function create(array $data)

@@ -206,7 +206,13 @@ $bulksms = new Bulksms();
 $bulksms->send(['25472xxxxxxx, 25475xxxxxxx, 25476xxxxxxx'], 'Hello, I am just testing this applications', '2026-04-25 09:46:00');
 ```
 
-## Template SMS with Dynamic Placeholders
+## Template SMS with Dynamic Placeholders (Optional)
+
+SMS templates are now stored in the database.
+• 	Templates can include dynamic placeholders like {name}  or {name:User}.
+• 	Placeholders are automatically validated and replaced with runtime values.
+• 	Defaults can be defined inside placeholders (e.g.,  uses “User” if no name is provided in {name:User}).
+• 	This makes bulk messaging more flexible and professional, allowing you to reuse and personalize messages without hardcoding text.
 
 ```php
   use Eddieodira\Messager\Bulksms;
@@ -219,14 +225,59 @@ $bulksms->send(['25472xxxxxxx, 25475xxxxxxx, 25476xxxxxxx'], 'Hello, I am just t
   ]);
   $bulksms->send(['254715070754', '254707362220'], $sms);
 ```
-
-In order to send schedule messages, add a third argument on the method send() ```$bulksms->send('2547xxxxxxxx', 'Hello, I am just testing this applications', '2026-04-25 09:46:00'); ```, with date and time as the argument:
+## Extracting Placeholders
+To know the placeholders in a particular sms template, do the follwing:
 
 ```php
-use Eddieodira\Messager\Bulksms;
+  use Eddieodira\Messager\Bulksms;
 
-$bulksms = new Bulksms();
-$bulksms->send(['25472xxxxxxx, 25475xxxxxxx, 25476xxxxxxx'], 'Hello, I am just testing this applications', '2026-04-25 09:46:00');
+  $bulksms = new Bulksms();
+  $extractedPlaceholders = $bulksms->extractPlaceholders('fees_increase');
+```
+Here the string argument 'fees_increase' is the template code. This is found in the database table. It give the list in array form including any default value given or null if no default is specified.
+
+```php
+  array (size=3)
+  'name'          => string 'User' (length=4)
+  'contact'       => string 'Representative' (length=14)
+  'organisation'  => null
+```
+
+Other methods:
+Add SMS Template with Placeholders
+```php
+  use Eddieodira\Messager\Bulksms;
+
+  $bulksms = new Bulksms();
+  $bulksms->create(["code" => ..., "name" => ..., "content" => ...]);
+```
+Update SMS Template with Placeholders
+```php
+  use Eddieodira\Messager\Bulksms;
+
+  $bulksms = new Bulksms();
+  $bulksms->update(["code" => ..., "name" => ..., "content" => ...], 2);
+```
+Find ALL SMS Template
+```php
+  use Eddieodira\Messager\Bulksms;
+
+  $bulksms = new Bulksms();
+  $sms = $bulksms->findTemplates();
+```
+Find 1 SMS Template by ID
+```php
+  use Eddieodira\Messager\Bulksms;
+
+  $bulksms = new Bulksms();
+  $sms = $bulksms->findTemplate(1);
+```
+Find 1 SMS Template by any other column
+```php
+  use Eddieodira\Messager\Bulksms;
+
+  $bulksms = new Bulksms();
+  $sms = $bulksms->findByWhere('column', value);
 ```
 
 # Contact
