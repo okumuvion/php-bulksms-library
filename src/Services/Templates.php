@@ -70,27 +70,29 @@ class Templates
      * @param array $data Key-value pairs to replace placeholders
      * @return string Rendered message
      */
-    public function renderTemplate(string $code, array $data): string
+    public function renderTemplate(string $code, array $data): ?string
     {
         // Fetch template by code
         $content = $this->getContentByCode($code);
 
-        // Match placeholders with optional default values
-        preg_match_all('/\{(\w+)(?::([^}]+))?\}/', $content, $matches, PREG_SET_ORDER);
-        foreach ($matches as $match) {
-            $key     = $match[1];              // e.g. "username"
-            $default = $match[2] ?? '';        // e.g. "User"
-            $value   = $data[$key] ?? $default;
+        if (! is_null($content)) {
+            // Match placeholders with optional default values
+            preg_match_all('/\{(\w+)(?::([^}]+))?\}/', $content, $matches, PREG_SET_ORDER);
+            foreach ($matches as $match) {
+                $key     = $match[1];              // e.g. "username"
+                $default = $match[2] ?? '';        // e.g. "User"
+                $value   = $data[$key] ?? $default;
 
-            // If still empty and no default, throw error
-            if ($value === '' && $default === '') {
-                throw new \RuntimeException("Missing placeholder: {$key}");
+                // If still empty and no default, throw error
+                if ($value === '' && $default === '') {
+                    throw new \RuntimeException("Missing placeholder: {$key}");
+                }
+
+                $content = str_replace($match[0], $value, $content);
             }
-
-            $content = str_replace($match[0], $value, $content);
+            return $content;
         }
-
-        return $content;
+        return null;
     }
 
     /**
@@ -99,19 +101,22 @@ class Templates
      * @param string $template The template text
      * @return array<string,string|null> Associative array: [placeholder => default|null]
      */
-    public function extractPlaceholders(string $code): array
+    public function extractPlaceholders(string $code): ?array
     {
         // Fetch template by code
         $content = $this->getContentByCode($code);
 
-        preg_match_all('/\{([a-zA-Z_]\w*)(?::([^}]+))?\}/', $content, $matches);
+        if (! is_null($content)) {
+            preg_match_all('/\{([a-zA-Z_]\w*)(?::([^}]+))?\}/', $content, $matches);
 
-        $placeholders = [];
-        foreach ($matches[1] as $i => $name) {
-            $placeholders[$name] = $matches[2][$i] !== '' ? $matches[2][$i] : null;
+            $placeholders = [];
+            foreach ($matches[1] as $i => $name) {
+                $placeholders[$name] = $matches[2][$i] !== '' ? $matches[2][$i] : null;
+            }
+
+            return $placeholders;
         }
-
-        return $placeholders;
+        return null;
     }
 
 }
