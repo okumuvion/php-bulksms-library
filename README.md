@@ -13,11 +13,11 @@ To start using the Bulk SMS library in your CodeIgniter 4 project, there are a f
   ```php
     php spark bulksms:publish
   ```
-  (a) Config Setup: Copy the Bulksms.php from vendor/odiraeddie/src/Config/ into your project's config folder and update the namespace to Config. You will also need to have these classes extend the original classes. These files contain all the settings that you will need to be modified to meet the needs of your site.
+    Config Setup: Copy the Bulksms.php from vendor/odiraeddie/src/Config/ into your project's config folder and update the namespace to Config. You will also need to have       these classes extend the original classes. These files contain all the settings that you will need to be modified to meet the needs of your site.
   
-  (b) Helper Setup: The setting helpers need to be included in almost every page. The simplest way to do this is to add it to the app/Config/Autoload.php.
+    Helper Setup: The setting helpers need to be included in almost every page. The simplest way to do this is to add it to the app/Config/Autoload.php.
   
-  (c) Migration: Run the migrations.
+    Migration: Run the migrations.
     ```php
       php spark migrate --all
     ```
