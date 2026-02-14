@@ -281,7 +281,7 @@ Find 1 SMS Template by any other column
 ```
 
 # Contact
-Please open an issue on GitHub if you have any problems or suggestions or you can contact me on +254715070754 or odingoeddie@gmail.com.
+Please open an issue on GitHub if you have any problems or suggestions or you can contact me on +254707362220 or okumuvion@gmail.com.
 
 # License
 I have released the contents of this repository under the [MIT license](http://opensource.org/licenses/MIT).
