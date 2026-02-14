@@ -1,8 +1,13 @@
 {
     "name": "eddieodira/messager",
-    "description": "PHP BulkSMS API Implementation for Hostpinnacle (Kenya)",
+    "description": "Codeigniter4 BulkSMS API Implementation for Hostpinnacle (Kenya)",
     "type": "library",
     "license": "MIT",
+    "require": {
+        "codeigniter4/framework": "^4.5",
+        "codeigniter4/settings": "^2.0",
+        "php": "^7.3|^8.1"
+    },
     "autoload": {
         "psr-4": {
             "Eddieodira\\Messager\\": "src/"

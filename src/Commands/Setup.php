@@ -1,0 +1,234 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Eddieodira\Messager\Commands;
+
+use Config\Services;
+use CodeIgniter\CLI\CLI;
+use Config\Autoload as AutoloadConfig;
+use CodeIgniter\Commands\Database\Migrate;
+use CodeIgniter\Test\Filters\CITestStreamFilter;
+use Eddieodira\Messager\Commands\Setup\ContentReplacer;
+
+class Setup extends BaseCommand
+{
+    protected $name        = 'bulksms:publish';
+    protected $description = 'Publish Cart config file to app/Config';
+
+    /**
+     * The path to `Eddieodira\Shoppingcart\` src directory.
+     *
+     * @var string
+     */
+    protected $sourcePath;
+
+    protected $distPath = APPPATH;
+    private ContentReplacer $replacer;
+
+    /**
+     * Displays the help for the spark cli script itself.
+     */
+    public function run(array $params): void
+    {
+        $this->replacer = new ContentReplacer();
+
+        $this->sourcePath = __DIR__ . '/../';
+
+        $this->publishConfig();
+    }
+
+    private function publishConfig(): void
+    {
+        $this->publishBulksmsConfig();
+        $this->publishValidationConfig();
+        $this->setAutoloadHelpers();
+        $this->runMigrations();
+    }
+
+    /**
+     * @param string $file     Relative file path like 'Config/Cart.php'.
+     * @param array  $replaces [search => replace]
+     */
+    protected function copyAndReplace(string $file, array $replaces): void
+    {
+        $path = "{$this->sourcePath}/{$file}";
+
+        $content = file_get_contents($path);
+
+        $content = $this->replacer->replace($content, $replaces);
+
+        $this->writeFile($file, $content);
+    }
+
+    private function publishBulksmsConfig(): void
+    {
+        $file     = 'Config/Bulksms.php';
+        $replaces = [
+            'namespace Eddieodira\Messager\Config'  => 'namespace Config',
+            'use CodeIgniter\\Config\\BaseConfig;' => 'use Eddieodira\\Messager\\Config\\Bulksms as BulksmsConfig;',
+            'extends BaseConfig'                   => 'extends BulksmsConfig',
+        ];
+
+        $this->copyAndReplace($file, $replaces);
+    }
+
+    /**
+     * Replace for setupHelper()
+     *
+     * @param string $file     Relative file path like 'Controllers/BaseController.php'.
+     * @param array  $replaces [search => replace]
+     */
+    private function replace(string $file, array $replaces): bool
+    {
+        $path      = $this->distPath . $file;
+        $cleanPath = clean_path($path);
+
+        $content = file_get_contents($path);
+
+        $output = $this->replacer->replace($content, $replaces);
+
+        if ($output === $content) {
+            return false;
+        }
+
+        if (write_file($path, $output)) {
+            $this->write(CLI::color('  Updated: ', 'green') . $cleanPath);
+
+            return true;
+        }
+
+        $this->error("  Error updating {$cleanPath}.");
+
+        return false;
+    }
+
+     /**
+     * Write a file, catching any exceptions and showing a
+     * nicely formatted error.
+     *
+     * @param string $file Relative file path like 'Config/Cart.php'.
+     */
+    protected function writeFile(string $file, string $content): void
+    {
+        $path      = $this->distPath . $file;
+        $cleanPath = clean_path($path);
+
+        $directory = dirname($path);
+
+        if (! is_dir($directory)) {
+            mkdir($directory, 0777, true);
+        }
+
+        if (file_exists($path)) {
+            $overwrite = (bool) CLI::getOption('f');
+
+            if (
+                ! $overwrite
+                && $this->prompt("  File '{$cleanPath}' already exists in destination. Overwrite?", ['n', 'y']) === 'n'
+            ) {
+                $this->error("  Skipped {$cleanPath}. If you wish to overwrite, please use the '-f' option or reply 'y' to the prompt.");
+
+                return;
+            }
+        }
+
+        if (write_file($path, $content)) {
+            $this->write(CLI::color("  The file is Created: ", 'green') . $cleanPath);
+        } else {
+            $this->error("  Error creating {$cleanPath}.");
+        }
+    }
+
+    private function runMigrations(): void
+    {
+        if (
+            $this->prompt('  Run `spark migrate --all` now?', ['y', 'n']) === 'n'
+        ) {
+            return;
+        }
+
+        $command = new Migrate(Services::logger(), Services::commands());
+
+        // This is a hack for testing.
+        // @TODO Remove CITestStreamFilter and refactor when CI 4.5.0 or later is supported.
+        CITestStreamFilter::registration();
+        CITestStreamFilter::addOutputFilter();
+        CITestStreamFilter::addErrorFilter();
+
+        $command->run(['all' => null]);
+
+        CITestStreamFilter::removeOutputFilter();
+        CITestStreamFilter::removeErrorFilter();
+
+        // Capture the output, and write for testing.
+        // @TODO Remove CITestStreamFilter and refactor when CI 4.5.0 or later is supported.
+        $output = CITestStreamFilter::$buffer;
+        $this->write($output);
+
+        CITestStreamFilter::$buffer = '';
+    }
+
+    private function setAutoloadHelpers(): void
+    {
+        $file = 'Config/Autoload.php';
+
+        $path      = $this->distPath . $file;
+        $cleanPath = clean_path($path);
+
+        $config     = new AutoloadConfig();
+        $helpers    = $config->helpers;
+        $newHelpers = array_unique(array_merge($helpers, ['setting']));
+
+        $content = file_get_contents($path);
+        $output  = $this->updateAutoloadHelpers($content, $newHelpers);
+
+        // check if the content is updated
+        if ($output === $content) {
+            $this->write(CLI::color('  Autoload Setup: ', 'green') . '`setting` helper successfully added to Autoload.php. Everything is great.');
+
+            return;
+        }
+
+        if (write_file($path, $output)) {
+            $this->write(CLI::color('  Updated: ', 'green') . $cleanPath);
+
+            $this->removeHelperLoadingInBaseController();
+        } else {
+            $this->error("  Error updating file '{$cleanPath}'.");
+        }
+    }
+
+    /**
+     * @param string       $content    The content of Config\Autoload.
+     * @param list<string> $newHelpers The list of helpers.
+     */
+    private function updateAutoloadHelpers(string $content, array $newHelpers): string
+    {
+        $pattern = '/^    public \$helpers = \[.*?\];/msu';
+        $replace = '    public $helpers = [\'' . implode("', '", $newHelpers) . '\'];';
+
+        return preg_replace($pattern, $replace, $content);
+    }
+
+    private function removeHelperLoadingInBaseController(): void
+    {
+        $file = 'Controllers/BaseController.php';
+
+        $check = '        $this->helpers = array_merge($this->helpers, [\'setting\']);';
+
+        // Replace old helper setup
+        $replaces = [
+            '$this->helpers = array_merge($this->helpers, [\'setting\']);' => $check,
+        ];
+        $this->replace($file, $replaces);
+
+        // Remove helper setup
+        $replaces = [
+            "\n" . $check . "\n" => '',
+        ];
+        $this->replace($file, $replaces);
+    }
+}
+
+
