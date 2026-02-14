@@ -33,7 +33,7 @@ To start using the Bulk SMS library in your CodeIgniter 4 project, there are a f
         FormatRules::class,
         FileRules::class,
         CreditCardRules::class,
-        TemplateRules::class, // Bulk SMS rules goes here
+        \Eddieodira\Messager\Validation\TemplateRules::class, // Bulk SMS rules goes here
     ];
 
 ## Registration
