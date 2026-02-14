@@ -41,7 +41,6 @@ class Setup extends BaseCommand
     private function publishConfig(): void
     {
         $this->publishBulksmsConfig();
-        $this->publishValidationConfig();
         $this->setAutoloadHelpers();
         $this->runMigrations();
     }
