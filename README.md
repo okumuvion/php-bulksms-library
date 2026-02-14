@@ -19,6 +19,7 @@ To start using the Bulk SMS library in your CodeIgniter 4 project, there are a f
     ```php
       php spark migrate --all
     ```
+    
 2. Update Validation Rules
    Add your custom rules to: 
     ```php
