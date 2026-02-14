@@ -173,8 +173,6 @@ use Eddieodira\Messager\Facades\Bulksms;
 Bulksms::send(...);
 ```
 
-
-## Usage
 The Codeigniter4 Bulk SMS Library gives you the following methods to use:
 
 ### Bulksms::send(...)
