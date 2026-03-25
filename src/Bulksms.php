@@ -52,8 +52,10 @@ class Bulksms extends Constants
         ];
     }
 
-    public function send(string|array $phone, string $msg, ?string $date = null)
+    public function send(string|array $phone, string $msg = null, ?string $date = null)
     {
+        assert(! is_null($msg), "The variable {$msg} should not be null");
+
         if (! $this->is_connected()) {
             return [
                 'status'  => 'error',
