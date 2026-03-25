@@ -1,5 +1,5 @@
 {
-    "name": "viontex/dispatcher",
+    "name": "viontex/communications",
     "description": "Codeigniter4 Bulk SMS/Email.",
     "type": "library",
     "license": "MIT",
