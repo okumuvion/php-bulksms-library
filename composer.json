@@ -1,6 +1,6 @@
 {
-    "name": "eddieodira/messager",
-    "description": "Codeigniter4 BulkSMS API Implementation for Hostpinnacle (Kenya)",
+    "name": "viontex/dispatcher",
+    "description": "Codeigniter4 Bulk SMS/Email.",
     "type": "library",
     "license": "MIT",
     "require": {
@@ -15,8 +15,8 @@
     },
     "authors": [
         {
-            "name": "Eddy Odingo Odira",
-            "email": "76993534+Eddieodira@users.noreply.github.com"
+            "name": "Violet okumu",
+            "email": "okumuvion@gmail.com"
         }
     ],
     "minimum-stability": "stable",
